@@ -1,0 +1,261 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:FindModbus.UI.ViewModels"
+        xmlns:conv="using:FindModbus.UI.Converters"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d" d:DesignWidth="1200" d:DesignHeight="800"
+        x:Class="FindModbus.UI.MainWindow"
+        x:DataType="vm:MainWindowViewModel"
+        Title="Modbus 智能扫描工具" Width="1200" Height="800"
+        WindowStartupLocation="CenterScreen">
+    
+    <Window.Resources>
+        <conv:BoolToColorConverter x:Key="BoolToColorConverter"/>
+        <conv:BoolToTextConverter x:Key="BoolToTextConverter"/>
+        <conv:ParityToStringConverter x:Key="ParityToStringConverter"/>
+        <conv:StopBitsToStringConverter x:Key="StopBitsToStringConverter"/>
+        <conv:ByteToBoolConverter x:Key="ByteToBoolConverter"/>
+        <conv:FunctionCodeDisplayConverter x:Key="FunctionCodeDisplayConverter"/>
+    </Window.Resources>
+    
+    <Grid RowDefinitions="Auto,*" ColumnDefinitions="300,*,350" Margin="10">
+        
+        <!-- 标题栏 -->
+        <TextBlock Grid.Row="0" Grid.ColumnSpan="3" 
+                   Text="Modbus 地址与参数智能扫描工具" 
+                   FontSize="18" FontWeight="Bold" 
+                   Margin="0,0,0,10" HorizontalAlignment="Center"/>
+        
+        <!-- 左侧：配置面板 -->
+        <Border Grid.Row="1" Grid.Column="0" 
+                BorderBrush="Gray" BorderThickness="1" 
+                Padding="10" Margin="0,0,5,0">
+            <ScrollViewer HorizontalScrollBarVisibility="Disabled" 
+                         VerticalScrollBarVisibility="Auto"
+                         ClipToBounds="False">
+                <StackPanel Spacing="15">
+                    <TextBlock Text="连接配置" FontSize="16" FontWeight="Bold"/>
+                    
+                    <!-- 连接模式 -->
+                    <StackPanel Spacing="5">
+                        <TextBlock Text="连接模式:"/>
+                        <RadioButton Content="Modbus TCP" 
+                                   IsChecked="{Binding IsTcpMode}"
+                                   Command="{Binding SelectTcpCommand}"/>
+                        <RadioButton Content="Modbus RTU" 
+                                   IsChecked="{Binding IsRtuMode}"
+                                   Command="{Binding SelectRtuCommand}"/>
+                    </StackPanel>
+                    
+                    <!-- TCP 配置 -->
+                    <StackPanel Spacing="5" IsVisible="{Binding IsTcpMode}">
+                        <TextBlock Text="IP 地址:"/>
+                        <TextBox Text="{Binding IpAddress}"/>
+                        <TextBlock Text="端口:"/>
+                        <NumericUpDown Value="{Binding Port}" Minimum="1" Maximum="65535"/>
+                    </StackPanel>
+                    
+                    <!-- RTU 配置 -->
+                    <StackPanel Spacing="5" IsVisible="{Binding IsRtuMode}">
+                        <StackPanel Orientation="Horizontal" Spacing="5">
+                            <TextBlock Text="串口:" VerticalAlignment="Center"/>
+                            <Button Content="刷新" Command="{Binding RefreshPortsCommand}" Padding="5,2"/>
+                        </StackPanel>
+                        <ComboBox ItemsSource="{Binding AvailablePorts}" 
+                                SelectedItem="{Binding SelectedPort, Mode=TwoWay}"
+                                Height="30"
+                                IsEnabled="True"/>
+                        <TextBlock Text="波特率:"/>
+                        <ComboBox ItemsSource="{Binding BaudRateOptions}" 
+                                SelectedItem="{Binding BaudRate, Mode=TwoWay}"
+                                Height="30"
+                                IsEnabled="True"/>
+                        <TextBlock Text="校验位:"/>
+                        <ComboBox ItemsSource="{Binding ParityOptions}" 
+                                SelectedItem="{Binding SelectedParity, Mode=TwoWay}"
+                                Height="30"
+                                IsEnabled="True"/>
+                        <TextBlock Text="停止位:"/>
+                        <ComboBox ItemsSource="{Binding StopBitsOptions}" 
+                                SelectedItem="{Binding SelectedStopBits, Mode=TwoWay}"
+                                Height="30"
+                                IsEnabled="True"/>
+                    </StackPanel>
+                    
+                    <Separator/>
+                    
+                    <!-- 扫描范围 -->
+                    <TextBlock Text="扫描范围" FontSize="14" FontWeight="Bold"/>
+                    <StackPanel Spacing="5">
+                        <!-- Slave ID 起始和终止在一列 -->
+                        <TextBlock Text="Slave ID 起始:"/>
+                        <NumericUpDown Value="{Binding SlaveIdStart}" 
+                                     Minimum="1" 
+                                     Maximum="247"
+                                     ShowButtonSpinner="False"/>
+                        <TextBlock Text="Slave ID 终止:"/>
+                        <NumericUpDown Value="{Binding SlaveIdEnd}" 
+                                     Minimum="1" 
+                                     Maximum="247"
+                                     ShowButtonSpinner="False"/>
+                        
+                        <!-- 功能码下拉单选 -->
+                        <TextBlock Text="功能码:"/>
+                        <ComboBox ItemsSource="{Binding FunctionCodeOptions}" 
+                                SelectedItem="{Binding SelectedFunctionCodeDisplay, Mode=TwoWay}"
+                                Height="30"
+                                IsEnabled="True"/>
+                        
+                        <!-- 寄存器起始地址 -->
+                        <TextBlock Text="寄存器起始地址:"/>
+                        <NumericUpDown Value="{Binding RegisterStartAddress}" 
+                                     Minimum="0" 
+                                     Maximum="65535"
+                                     ShowButtonSpinner="False"/>
+                        
+                        <!-- 寄存器数量 -->
+                        <TextBlock Text="寄存器数量:"/>
+                        <NumericUpDown Value="{Binding RegisterCount}" 
+                                     Minimum="1" 
+                                     Maximum="125"
+                                     ShowButtonSpinner="False"/>
+                    </StackPanel>
+                    
+                    <Separator/>
+                    
+                    <!-- 操作按钮 -->
+                    <StackPanel Spacing="5">
+                        <Button Content="开始扫描" 
+                              Command="{Binding StartScanCommand}" 
+                              IsEnabled="{Binding IsNotScanning}"
+                              Classes.accent="True"/>
+                        <Button Content="停止扫描" 
+                              Command="{Binding StopScanCommand}" 
+                              IsEnabled="{Binding IsScanning}"/>
+                    </StackPanel>
+                </StackPanel>
+            </ScrollViewer>
+        </Border>
+        
+        <!-- 中间：日志面板 -->
+        <Border Grid.Row="1" Grid.Column="1" 
+                BorderBrush="Gray" BorderThickness="1" 
+                Padding="10" Margin="5,0">
+            <Grid RowDefinitions="Auto,*,Auto">
+                <StackPanel Orientation="Horizontal" Spacing="10" Margin="0,0,0,5">
+                    <TextBlock Text="扫描日志" FontSize="16" FontWeight="Bold"/>
+                    <Button Content="清空" Command="{Binding ClearLogCommand}" Padding="5,2"/>
+                </StackPanel>
+                
+                <ScrollViewer Grid.Row="1">
+                    <TextBox Text="{Binding LogText}" 
+                           IsReadOnly="True" 
+                           TextWrapping="Wrap"
+                           FontFamily="Consolas"
+                           Background="Black" Foreground="LightGreen"
+                           Classes.pointer="False">
+                        <TextBox.Styles>
+                            <Style Selector="TextBox:pointerover">
+                                <Setter Property="Background" Value="Black"/>
+                            </Style>
+                        </TextBox.Styles>
+                    </TextBox>
+                </ScrollViewer>
+                
+                <!-- 进度信息 -->
+                <StackPanel Grid.Row="2" Spacing="5" Margin="0,5,0,0">
+                    <TextBlock Text="{Binding CurrentParameter}" 
+                             TextWrapping="Wrap" 
+                             FontSize="12"/>
+                    <ProgressBar Value="{Binding ProgressPercentage}" 
+                               Maximum="100" 
+                               Height="20"/>
+                    <TextBlock Text="{Binding ProgressPercentage, StringFormat='进度: {0:F1}%'}" 
+                             HorizontalAlignment="Center"/>
+                </StackPanel>
+            </Grid>
+        </Border>
+        
+        <!-- 右侧：结果面板 -->
+        <Border Grid.Row="1" Grid.Column="2" 
+                BorderBrush="Gray" BorderThickness="1" 
+                Padding="10" Margin="5,0,0,0">
+            <Grid RowDefinitions="Auto,*">
+                <TextBlock Grid.Row="0" 
+                         Text="扫描结果" 
+                         FontSize="16" FontWeight="Bold" 
+                         Margin="0,0,0,10"/>
+                
+                <ScrollViewer Grid.Row="1">
+                    <ItemsControl ItemsSource="{Binding ScanResults}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Border Margin="0,5" 
+                                      Padding="10" 
+                                      BorderBrush="{Binding Success, Converter={StaticResource BoolToColorConverter}, ConverterParameter='Green|Red'}"
+                                      BorderThickness="2"
+                                      CornerRadius="5"
+                                      Background="{Binding Success, Converter={StaticResource BoolToColorConverter}, ConverterParameter='#E8F5E9|#FFEBEE'}">
+                                    <StackPanel Spacing="8">
+                                        <!-- 地址在中间，大字体 -->
+                                        <TextBlock FontWeight="Bold" FontSize="18" HorizontalAlignment="Center">
+                                            <Run Text="Slave ID: "/>
+                                            <Run Text="{Binding SlaveId}"/>
+                                        </TextBlock>
+                                        
+                                        <!-- 状态标签 -->
+                                        <TextBlock Foreground="{Binding Success, Converter={StaticResource BoolToColorConverter}, ConverterParameter='Green|Red'}"
+                                                 FontWeight="Bold"
+                                                 FontSize="12"
+                                                 HorizontalAlignment="Center"
+                                                 Text="{Binding Success, Converter={StaticResource BoolToTextConverter}, ConverterParameter='成功|失败'}"/>
+                                        
+                                        <!-- 功能码、起始地址、数量 -->
+                                        <StackPanel Spacing="3" Margin="0,5,0,0">
+                                            <TextBlock HorizontalAlignment="Center">
+                                                <Run Text="功能码: "/>
+                                                <Run Text="{Binding FunctionCode}"/>
+                                            </TextBlock>
+                                            <TextBlock HorizontalAlignment="Center">
+                                                <Run Text="寄存器起始地址: "/>
+                                                <Run Text="{Binding StartAddress}"/>
+                                            </TextBlock>
+                                            <TextBlock HorizontalAlignment="Center">
+                                                <Run Text="寄存器数量: "/>
+                                                <Run Text="{Binding Count}"/>
+                                            </TextBlock>
+                                        </StackPanel>
+                                        
+                                        <!-- 可信度（仅成功时显示） -->
+                                        <TextBlock IsVisible="{Binding Success}" HorizontalAlignment="Center" Margin="0,5,0,0">
+                                            <Run Text="可信度: "/>
+                                            <Run Text="{Binding ReliabilityScore.TotalScore, StringFormat='{}{0:F1}'}"/>
+                                            <Run Text=" | 等级: "/>
+                                            <Run Text="{Binding ReliabilityScore.Level}"/>
+                                        </TextBlock>
+                                        
+                                        <!-- 错误消息（仅失败时显示） -->
+                                        <TextBlock IsVisible="{Binding !Success}" 
+                                                 Foreground="Red"
+                                                 TextWrapping="Wrap"
+                                                 HorizontalAlignment="Center"
+                                                 Margin="0,5,0,0"
+                                                 Text="{Binding ErrorMessage}"/>
+                                        
+                                        <!-- 扫描时间 -->
+                                        <TextBlock FontSize="10" Foreground="Gray" HorizontalAlignment="Center" Margin="0,5,0,0">
+                                            <Run Text="扫描时间: "/>
+                                            <Run Text="{Binding ScanTime, StringFormat='{}{0:yyyy-MM-dd HH:mm:ss}'}"/>
+                                        </TextBlock>
+                                    </StackPanel>
+                                </Border>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </ScrollViewer>
+            </Grid>
+        </Border>
+    </Grid>
+</Window>
+
