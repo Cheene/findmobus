@@ -19,10 +19,10 @@ public partial class MainWindowViewModel : ObservableObject
     private CancellationTokenSource? _cancellationTokenSource;
 
     [ObservableProperty]
-    private ConnectionMode _selectedMode = ConnectionMode.Tcp;
+    private ConnectionMode _selectedMode = ConnectionMode.Rtu;
 
     [ObservableProperty]
-    private string _ipAddress = "192.168.1.100";
+    private string _ipAddress = "127.0.0.1";
 
     [ObservableProperty]
     private int _port = 502;
@@ -75,7 +75,7 @@ public partial class MainWindowViewModel : ObservableObject
     private byte _slaveIdStart = 1;
 
     [ObservableProperty]
-    private byte _slaveIdEnd = 247;
+    private byte _slaveIdEnd = 1;
 
     [ObservableProperty]
     private ushort _registerStartAddress = 0;
@@ -266,6 +266,12 @@ public partial class MainWindowViewModel : ObservableObject
     private void ClearLog()
     {
         LogText = string.Empty;
+    }
+    
+    [RelayCommand]
+    private void ToggleResultDetail(ScanResult result)
+    {
+        result.IsDetailVisible = !result.IsDetailVisible;
     }
 
 

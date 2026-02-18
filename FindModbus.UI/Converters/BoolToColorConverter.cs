@@ -1,4 +1,5 @@
 using Avalonia.Data.Converters;
+using Avalonia.Media;
 using System;
 using System.Globalization;
 
@@ -13,7 +14,11 @@ public class BoolToColorConverter : IValueConverter
             var parts = param.Split('|');
             if (parts.Length == 2)
             {
-                return boolValue ? parts[0] : parts[1];
+                var colorString = boolValue ? parts[0] : parts[1];
+                if (Color.TryParse(colorString, out var color))
+                {
+                    return new SolidColorBrush(color);
+                }
             }
         }
         return null;

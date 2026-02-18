@@ -6,12 +6,108 @@ using FindModbus.Protocol.ModbusTcp;
 namespace FindModbus.Protocol;
 
 /// <summary>
+/// Modbus 报文十六进制格式化与 CRC 计算
+/// </summary>
+internal static class ModbusPacketHelper
+{
+    /// <summary>请求 PDU：SlaveId + FunctionCode + StartAddress(2) + Count(2) = 6 字节</summary>
+    public static byte[] BuildRequestPdu(byte slaveId, byte functionCode, ushort startAddress, ushort count)
+    {
+        return new[]
+        {
+            slaveId,
+            functionCode,
+            (byte)(startAddress >> 8),
+            (byte)(startAddress & 0xFF),
+            (byte)(count >> 8),
+            (byte)(count & 0xFF)
+        };
+    }
+
+    /// <summary>TCP 请求帧：MBAP(7) + PDU(6)</summary>
+    public static byte[] BuildTcpRequest(byte slaveId, byte functionCode, ushort startAddress, ushort count, ushort transactionId = 0)
+    {
+        var pdu = BuildRequestPdu(slaveId, functionCode, startAddress, count);
+        return new byte[]
+        {
+            (byte)(transactionId >> 8),
+            (byte)(transactionId & 0xFF),
+            0, 0,  // Protocol ID
+            (byte)(pdu.Length >> 8),
+            (byte)(pdu.Length & 0xFF),
+            slaveId
+        }.Concat(pdu).ToArray();
+    }
+
+    /// <summary>RTU 请求帧：PDU(6) + CRC(2)</summary>
+    public static byte[] BuildRtuRequest(byte slaveId, byte functionCode, ushort startAddress, ushort count)
+    {
+        var pdu = BuildRequestPdu(slaveId, functionCode, startAddress, count);
+        var crc = Crc16(pdu);
+        return pdu.Concat(new[] { (byte)(crc & 0xFF), (byte)(crc >> 8) }).ToArray();
+    }
+
+    public static ushort Crc16(byte[] data)
+    {
+        ushort crc = 0xFFFF;
+        foreach (var b in data)
+        {
+            crc ^= b;
+            for (var i = 0; i < 8; i++)
+            {
+                if ((crc & 1) != 0)
+                    crc = (ushort)((crc >> 1) ^ 0xA001);
+                else
+                    crc >>= 1;
+            }
+        }
+        return crc;
+    }
+
+    /// <summary>从扫描结果构建响应报文十六进制（PDU 格式）</summary>
+    public static string? BuildResponseHex(ScanResult result)
+    {
+        if (!result.Success || result.Data == null || result.Data.Length == 0)
+            return null;
+        var fc = result.FunctionCode;
+        var count = result.Count;
+        byte byteCount;
+        byte[] dataBytes;
+        if (fc == 3 || fc == 4)
+        {
+            byteCount = (byte)(2 * count);
+            dataBytes = result.Data.Length >= 4 + byteCount
+                ? result.Data.AsSpan(4, byteCount).ToArray()
+                : result.Data.Length > 4 ? result.Data[4..] : Array.Empty<byte>();
+        }
+        else
+        {
+            byteCount = (byte)((count + 7) / 8);
+            var bits = result.Data.Take((int)count).Select(b => b != 0).ToArray();
+            dataBytes = new byte[byteCount];
+            for (var i = 0; i < bits.Length; i++)
+                if (bits[i])
+                    dataBytes[i / 8] |= (byte)(1 << (i % 8));
+        }
+        var pdu = new List<byte> { result.SlaveId, fc, byteCount };
+        pdu.AddRange(dataBytes);
+        return BytesToHex(pdu.ToArray());
+    }
+
+    public static string BytesToHex(byte[] bytes)
+    {
+        return bytes.Length == 0 ? "" : string.Join(" ", bytes.Select(b => b.ToString("X2")));
+    }
+}
+
+/// <summary>
 /// 扫描服务实现
 /// </summary>
 public class ScanService : IScanService
 {
     private CancellationTokenSource? _cancellationTokenSource;
     private IModbusClient? _currentClient;
+    private ushort _tcpTransactionId;
 
     public event EventHandler<ScanProgress>? ProgressChanged;
     public event EventHandler<ScanResult>? ResultFound;
@@ -118,6 +214,11 @@ public class ScanService : IScanService
                     OnLogMessage($"✗ 失败: {currentParam} - {result.ErrorMessage}");
                 }
 
+                var reqTcp = ModbusPacketHelper.BuildTcpRequest(slaveId, functionCode, config.RegisterStartAddress, config.RegisterCount, _tcpTransactionId++);
+                OnLogMessage($"  请求报文: {ModbusPacketHelper.BytesToHex(reqTcp)}");
+                var respHex = ModbusPacketHelper.BuildResponseHex(result);
+                OnLogMessage(respHex != null ? $"  响应报文: {respHex}" : "  响应报文: 无（失败/超时）");
+
                 await Task.Delay(config.RequestInterval, cancellationToken);
             }
         }
@@ -207,6 +308,11 @@ public class ScanService : IScanService
                     {
                         OnLogMessage($"✗ 失败: {currentParam} - {result.ErrorMessage}");
                     }
+
+                    var reqRtu = ModbusPacketHelper.BuildRtuRequest(slaveId, functionCode, config.RegisterStartAddress, config.RegisterCount);
+                    OnLogMessage($"  请求报文: {ModbusPacketHelper.BytesToHex(reqRtu)}");
+                    var respHexRtu = ModbusPacketHelper.BuildResponseHex(result);
+                    OnLogMessage(respHexRtu != null ? $"  响应报文: {respHexRtu}" : "  响应报文: 无（失败/超时）");
 
                     await Task.Delay(config.RequestInterval, cancellationToken);
                 }

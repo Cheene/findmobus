@@ -54,6 +54,11 @@ public class ScanResult
     /// 扫描时间
     /// </summary>
     public DateTime ScanTime { get; set; } = DateTime.Now;
+    
+    /// <summary>
+    /// 详情是否可见（UI 绑定用）
+    /// </summary>
+    public bool IsDetailVisible { get; set; } = false;
 }
 
 

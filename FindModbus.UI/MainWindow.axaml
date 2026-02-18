@@ -8,7 +8,9 @@
         x:Class="FindModbus.UI.MainWindow"
         x:DataType="vm:MainWindowViewModel"
         Title="Modbus 智能扫描工具" Width="1200" Height="800"
-        WindowStartupLocation="CenterScreen">
+        WindowStartupLocation="CenterScreen"
+        WindowState="Normal"
+        Background="#f8fafc">
     
     <Window.Resources>
         <conv:BoolToColorConverter x:Key="BoolToColorConverter"/>
@@ -19,120 +21,312 @@
         <conv:FunctionCodeDisplayConverter x:Key="FunctionCodeDisplayConverter"/>
     </Window.Resources>
     
+    <Window.Styles>
+        <!-- 全局样式，使用浅色主题 -->
+        <Style Selector="TextBlock">
+            <Setter Property="Foreground" Value="#334155"/>
+        </Style>
+        <Style Selector="TextBlock:pointerover">
+            <Setter Property="Foreground" Value="#334155"/>
+        </Style>
+        <Style Selector="RadioButton">
+            <Setter Property="Foreground" Value="#334155"/>
+        </Style>
+        <Style Selector="RadioButton:pointerover">
+            <Setter Property="Foreground" Value="#334155"/>
+        </Style>
+        <Style Selector="ComboBox">
+            <Setter Property="Foreground" Value="#334155"/>
+            <Setter Property="Background" Value="#ffffff"/>
+            <Setter Property="BorderBrush" Value="#cbd5e1"/>
+        </Style>
+        <Style Selector="ComboBox:pointerover">
+            <Setter Property="Foreground" Value="#334155"/>
+            <Setter Property="Background" Value="#f1f5f9"/>
+            <Setter Property="BorderBrush" Value="#94a3b8"/>
+        </Style>
+        <Style Selector="ComboBox:selected">
+            <Setter Property="Foreground" Value="#334155"/>
+            <Setter Property="Background" Value="#ffffff"/>
+            <Setter Property="BorderBrush" Value="#3b82f6"/>
+        </Style>
+        <Style Selector="TextBox">
+            <Setter Property="Foreground" Value="#334155"/>
+            <Setter Property="Background" Value="#ffffff"/>
+            <Setter Property="BorderBrush" Value="#cbd5e1"/>
+        </Style>
+        <Style Selector="TextBox:focus">
+            <Setter Property="Foreground" Value="#334155"/>
+            <Setter Property="Background" Value="#ffffff"/>
+            <Setter Property="BorderBrush" Value="#3b82f6"/>
+        </Style>
+        <Style Selector="TextBox:pointerover">
+            <Setter Property="Foreground" Value="#334155"/>
+            <Setter Property="Background" Value="#f1f5f9"/>
+            <Setter Property="BorderBrush" Value="#94a3b8"/>
+        </Style>
+        <Style Selector="NumericUpDown">
+            <Setter Property="Foreground" Value="#334155"/>
+            <Setter Property="Background" Value="#ffffff"/>
+            <Setter Property="BorderBrush" Value="#cbd5e1"/>
+        </Style>
+        <Style Selector="NumericUpDown:focus">
+            <Setter Property="Foreground" Value="#334155"/>
+            <Setter Property="Background" Value="#ffffff"/>
+            <Setter Property="BorderBrush" Value="#3b82f6"/>
+        </Style>
+        <Style Selector="NumericUpDown:pointerover">
+            <Setter Property="Foreground" Value="#334155"/>
+            <Setter Property="Background" Value="#f1f5f9"/>
+            <Setter Property="BorderBrush" Value="#94a3b8"/>
+        </Style>
+        <Style Selector="Button">
+            <Setter Property="Foreground" Value="#334155"/>
+        </Style>
+        <Style Selector="Button:pointerover">
+            <Setter Property="Foreground" Value="#334155"/>
+        </Style>
+        <Style Selector="Button:disabled">
+            <Setter Property="Foreground" Value="#94a3b8"/>
+        </Style>
+    </Window.Styles>
+    
+
+    
     <Grid RowDefinitions="Auto,*" ColumnDefinitions="300,*,350" Margin="10">
         
         <!-- 标题栏 -->
         <TextBlock Grid.Row="0" Grid.ColumnSpan="3" 
                    Text="Modbus 地址与参数智能扫描工具" 
                    FontSize="18" FontWeight="Bold" 
-                   Margin="0,0,0,10" HorizontalAlignment="Center"/>
+                   Margin="0,0,0,10" HorizontalAlignment="Center"
+                   Foreground="#1e293b"/>
         
         <!-- 左侧：配置面板 -->
         <Border Grid.Row="1" Grid.Column="0" 
-                BorderBrush="Gray" BorderThickness="1" 
-                Padding="10" Margin="0,0,5,0">
+                BorderBrush="#e2e8f0" BorderThickness="1" 
+                Padding="15" Margin="0,0,5,0"
+                Background="#ffffff"
+                CornerRadius="8">
             <ScrollViewer HorizontalScrollBarVisibility="Disabled" 
-                         VerticalScrollBarVisibility="Auto"
-                         ClipToBounds="False">
+                         VerticalScrollBarVisibility="Auto">
                 <StackPanel Spacing="15">
-                    <TextBlock Text="连接配置" FontSize="16" FontWeight="Bold"/>
+                    <TextBlock Text="连接配置" FontSize="16" FontWeight="Bold"
+                               Foreground="#ffffff"/>
                     
                     <!-- 连接模式 -->
-                    <StackPanel Spacing="5">
+                    <StackPanel Spacing="8">
                         <TextBlock Text="连接模式:"/>
-                        <RadioButton Content="Modbus TCP" 
-                                   IsChecked="{Binding IsTcpMode}"
-                                   Command="{Binding SelectTcpCommand}"/>
-                        <RadioButton Content="Modbus RTU" 
-                                   IsChecked="{Binding IsRtuMode}"
-                                   Command="{Binding SelectRtuCommand}"/>
+                        <StackPanel Orientation="Horizontal" Spacing="10">
+                            <RadioButton Content="Modbus RTU" 
+                                       IsChecked="{Binding IsRtuMode}"
+                                       Command="{Binding SelectRtuCommand}"
+                                       GroupName="ConnectionMode"/>
+                            <RadioButton Content="Modbus TCP" 
+                                       IsChecked="{Binding IsTcpMode}"
+                                       Command="{Binding SelectTcpCommand}"
+                                       GroupName="ConnectionMode"/>
+                        </StackPanel>
                     </StackPanel>
                     
                     <!-- TCP 配置 -->
-                    <StackPanel Spacing="5" IsVisible="{Binding IsTcpMode}">
-                        <TextBlock Text="IP 地址:"/>
-                        <TextBox Text="{Binding IpAddress}"/>
-                        <TextBlock Text="端口:"/>
-                        <NumericUpDown Value="{Binding Port}" Minimum="1" Maximum="65535"/>
+                    <StackPanel Spacing="8" IsVisible="{Binding IsTcpMode}">
+                        <TextBlock Text="TCP 配置" FontSize="14" FontWeight="SemiBold"/>
+                        <StackPanel Spacing="5">
+                            <TextBlock Text="IP 地址:"/>
+                            <TextBox Text="{Binding IpAddress}"
+                                     BorderThickness="1"
+                                     CornerRadius="4"
+                                     Padding="8"
+                                     Height="32"/>
+                        </StackPanel>
+                        <StackPanel Spacing="5">
+                            <TextBlock Text="端口:"/>
+                            <NumericUpDown Value="{Binding Port}" Minimum="1" Maximum="65535"
+                                          BorderThickness="1"
+                                          CornerRadius="4"
+                                          Padding="8"
+                                          Height="32"/>
+                        </StackPanel>
                     </StackPanel>
                     
                     <!-- RTU 配置 -->
-                    <StackPanel Spacing="5" IsVisible="{Binding IsRtuMode}">
-                        <StackPanel Orientation="Horizontal" Spacing="5">
-                            <TextBlock Text="串口:" VerticalAlignment="Center"/>
-                            <Button Content="刷新" Command="{Binding RefreshPortsCommand}" Padding="5,2"/>
+                    <StackPanel Spacing="8" IsVisible="{Binding IsRtuMode}">
+                        <TextBlock Text="RTU 配置" FontSize="14" FontWeight="SemiBold"/>
+                        <StackPanel Spacing="5">
+                            <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                                <TextBlock Text="串口:" Width="60"/>
+                                <ComboBox ItemsSource="{Binding AvailablePorts}" 
+                                        SelectedItem="{Binding SelectedPort, Mode=TwoWay}"
+                                        Height="32"
+                                        BorderThickness="1"
+                                        CornerRadius="4"
+                                        Padding="8"/>
+                                <Button Content="刷新" Command="{Binding RefreshPortsCommand}" 
+                                        Height="32"
+                                        BorderThickness="1"
+                                        CornerRadius="4"
+                                        Width="60"/>
+                            </StackPanel>
                         </StackPanel>
-                        <ComboBox ItemsSource="{Binding AvailablePorts}" 
-                                SelectedItem="{Binding SelectedPort, Mode=TwoWay}"
-                                Height="30"
-                                IsEnabled="True"/>
-                        <TextBlock Text="波特率:"/>
-                        <ComboBox ItemsSource="{Binding BaudRateOptions}" 
-                                SelectedItem="{Binding BaudRate, Mode=TwoWay}"
-                                Height="30"
-                                IsEnabled="True"/>
-                        <TextBlock Text="校验位:"/>
-                        <ComboBox ItemsSource="{Binding ParityOptions}" 
-                                SelectedItem="{Binding SelectedParity, Mode=TwoWay}"
-                                Height="30"
-                                IsEnabled="True"/>
-                        <TextBlock Text="停止位:"/>
-                        <ComboBox ItemsSource="{Binding StopBitsOptions}" 
-                                SelectedItem="{Binding SelectedStopBits, Mode=TwoWay}"
-                                Height="30"
-                                IsEnabled="True"/>
+                        <StackPanel Spacing="8">
+                            <StackPanel Spacing="3">
+                                <TextBlock Text="波特率:"/>
+                                <ComboBox ItemsSource="{Binding BaudRateOptions}" 
+                                        SelectedItem="{Binding BaudRate, Mode=TwoWay}"
+                                        Height="32"
+                                        BorderThickness="1"
+                                        CornerRadius="4"
+                                        Padding="8"/>
+                            </StackPanel>
+                            <Grid ColumnDefinitions="*,10,*">
+                                <StackPanel Spacing="3" Grid.Column="0">
+                                    <TextBlock Text="校验位:"/>
+                                    <ComboBox ItemsSource="{Binding ParityOptions}" 
+                                            SelectedItem="{Binding SelectedParity, Mode=TwoWay}"
+                                            Height="32"
+                                            BorderThickness="1"
+                                            CornerRadius="4"
+                                            Padding="8"/>
+                                </StackPanel>
+                                <StackPanel Spacing="3" Grid.Column="2">
+                                    <TextBlock Text="停止位:"/>
+                                    <ComboBox ItemsSource="{Binding StopBitsOptions}" 
+                                            SelectedItem="{Binding SelectedStopBits, Mode=TwoWay}"
+                                            Height="32"
+                                            BorderThickness="1"
+                                            CornerRadius="4"
+                                            Padding="8"/>
+                                </StackPanel>
+                            </Grid>
+                        </StackPanel>
                     </StackPanel>
                     
-                    <Separator/>
+                    <Separator BorderBrush="#334155"/>
                     
                     <!-- 扫描范围 -->
-                    <TextBlock Text="扫描范围" FontSize="14" FontWeight="Bold"/>
-                    <StackPanel Spacing="5">
-                        <!-- Slave ID 起始和终止在一列 -->
-                        <TextBlock Text="Slave ID 起始:"/>
-                        <NumericUpDown Value="{Binding SlaveIdStart}" 
-                                     Minimum="1" 
-                                     Maximum="247"
-                                     ShowButtonSpinner="False"/>
-                        <TextBlock Text="Slave ID 终止:"/>
-                        <NumericUpDown Value="{Binding SlaveIdEnd}" 
-                                     Minimum="1" 
-                                     Maximum="247"
-                                     ShowButtonSpinner="False"/>
+                    <StackPanel Spacing="8">
+                        <TextBlock Text="扫描范围" FontSize="14" FontWeight="Bold"/>
                         
-                        <!-- 功能码下拉单选 -->
-                        <TextBlock Text="功能码:"/>
-                        <ComboBox ItemsSource="{Binding FunctionCodeOptions}" 
-                                SelectedItem="{Binding SelectedFunctionCodeDisplay, Mode=TwoWay}"
-                                Height="30"
-                                IsEnabled="True"/>
+                        <Grid ColumnDefinitions="*,10,*">
+                            <StackPanel Spacing="3" Grid.Column="0">
+                                <TextBlock Text="Slave ID 起始:"/>
+                                <NumericUpDown Value="{Binding SlaveIdStart}" 
+                                             Minimum="1" 
+                                             Maximum="247"
+                                             ShowButtonSpinner="False"
+                                             BorderThickness="1"
+                                             CornerRadius="4"
+                                             Padding="8"
+                                             Height="32"/>
+                            </StackPanel>
+                            <StackPanel Spacing="3" Grid.Column="2">
+                                <TextBlock Text="Slave ID 终止:"/>
+                                <NumericUpDown Value="{Binding SlaveIdEnd}" 
+                                             Minimum="1" 
+                                             Maximum="247"
+                                             ShowButtonSpinner="False"
+                                             BorderThickness="1"
+                                             CornerRadius="4"
+                                             Padding="8"
+                                             Height="32"/>
+                            </StackPanel>
+                        </Grid>
                         
-                        <!-- 寄存器起始地址 -->
-                        <TextBlock Text="寄存器起始地址:"/>
-                        <NumericUpDown Value="{Binding RegisterStartAddress}" 
-                                     Minimum="0" 
-                                     Maximum="65535"
-                                     ShowButtonSpinner="False"/>
+                        <StackPanel Spacing="5">
+                            <TextBlock Text="功能码:"/>
+                            <ComboBox ItemsSource="{Binding FunctionCodeOptions}" 
+                                    SelectedItem="{Binding SelectedFunctionCodeDisplay, Mode=TwoWay}"
+                                    Height="32"
+                                    BorderThickness="1"
+                                    CornerRadius="4"
+                                    Padding="8"/>
+                        </StackPanel>
                         
-                        <!-- 寄存器数量 -->
-                        <TextBlock Text="寄存器数量:"/>
-                        <NumericUpDown Value="{Binding RegisterCount}" 
-                                     Minimum="1" 
-                                     Maximum="125"
-                                     ShowButtonSpinner="False"/>
+                        <Grid ColumnDefinitions="*,10,*">
+                            <StackPanel Spacing="3" Grid.Column="0">
+                                <TextBlock Text="寄存器起始地址:"/>
+                                <NumericUpDown Value="{Binding RegisterStartAddress}" 
+                                             Minimum="0" 
+                                             Maximum="65535"
+                                             ShowButtonSpinner="False"
+                                             BorderThickness="1"
+                                             CornerRadius="4"
+                                             Padding="8"
+                                             Height="32"/>
+                            </StackPanel>
+                            <StackPanel Spacing="3" Grid.Column="2">
+                                <TextBlock Text="寄存器数量:"/>
+                                <NumericUpDown Value="{Binding RegisterCount}" 
+                                             Minimum="1" 
+                                             Maximum="125"
+                                             ShowButtonSpinner="False"
+                                             BorderThickness="1"
+                                             CornerRadius="4"
+                                             Padding="8"
+                                             Height="32"/>
+                            </StackPanel>
+                        </Grid>
                     </StackPanel>
                     
-                    <Separator/>
+                    <Separator BorderBrush="#e2e8f0"/>
                     
                     <!-- 操作按钮 -->
-                    <StackPanel Spacing="5">
+                    <StackPanel Spacing="10">
                         <Button Content="开始扫描" 
                               Command="{Binding StartScanCommand}" 
                               IsEnabled="{Binding IsNotScanning}"
-                              Classes.accent="True"/>
+                              Padding="12"
+                              BorderThickness="1"
+                              CornerRadius="6"
+                              FontWeight="SemiBold"
+                              FontSize="14"
+                              HorizontalAlignment="Stretch">
+                            <Button.Styles>
+                                <Style Selector="Button">
+                                    <Setter Property="Background" Value="#f59e0b"/>
+                                    <Setter Property="Foreground" Value="#0f172a"/>
+                                    <Setter Property="BorderBrush" Value="Transparent"/>
+                                </Style>
+                                <Style Selector="Button:pointerover">
+                                    <Setter Property="Background" Value="#d97706"/>
+                                    <Setter Property="Foreground" Value="#0f172a"/>
+                                    <Setter Property="BorderBrush" Value="Transparent"/>
+                                </Style>
+                                <Style Selector="Button:disabled">
+                                    <Setter Property="Background" Value="#e2e8f0"/>
+                                    <Setter Property="Foreground" Value="#94a3b8"/>
+                                    <Setter Property="BorderBrush" Value="Transparent"/>
+                                </Style>
+                            </Button.Styles>
+                        </Button>
                         <Button Content="停止扫描" 
                               Command="{Binding StopScanCommand}" 
-                              IsEnabled="{Binding IsScanning}"/>
+                              IsEnabled="{Binding IsScanning}"
+                              Padding="12"
+                              BorderThickness="1"
+                              CornerRadius="6"
+                              FontWeight="SemiBold"
+                              FontSize="14"
+                              HorizontalAlignment="Stretch">
+                            <Button.Styles>
+                                <Style Selector="Button">
+                                    <Setter Property="Background" Value="#3b82f6"/>
+                                    <Setter Property="Foreground" Value="#ffffff"/>
+                                    <Setter Property="BorderBrush" Value="Transparent"/>
+                                </Style>
+                                <Style Selector="Button:pointerover">
+                                    <Setter Property="Background" Value="#2563eb"/>
+                                    <Setter Property="Foreground" Value="#ffffff"/>
+                                    <Setter Property="BorderBrush" Value="Transparent"/>
+                                </Style>
+                                <Style Selector="Button:disabled">
+                                    <Setter Property="Background" Value="#e2e8f0"/>
+                                    <Setter Property="Foreground" Value="#94a3b8"/>
+                                    <Setter Property="BorderBrush" Value="Transparent"/>
+                                </Style>
+                            </Button.Styles>
+                        </Button>
                     </StackPanel>
                 </StackPanel>
             </ScrollViewer>
@@ -140,120 +334,167 @@
         
         <!-- 中间：日志面板 -->
         <Border Grid.Row="1" Grid.Column="1" 
-                BorderBrush="Gray" BorderThickness="1" 
-                Padding="10" Margin="5,0">
+                BorderBrush="#e2e8f0" BorderThickness="1" 
+                Background="#ffffff"
+                CornerRadius="8"
+                Padding="15" Margin="5,0">
             <Grid RowDefinitions="Auto,*,Auto">
-                <StackPanel Orientation="Horizontal" Spacing="10" Margin="0,0,0,5">
-                    <TextBlock Text="扫描日志" FontSize="16" FontWeight="Bold"/>
-                    <Button Content="清空" Command="{Binding ClearLogCommand}" Padding="5,2"/>
+                <StackPanel Orientation="Horizontal" Spacing="15" Margin="0,0,0,10" VerticalAlignment="Center">
+                    <TextBlock Text="扫描日志" FontSize="16" FontWeight="Bold" Foreground="#1e293b"/>
+                    <Button Content="清空" Command="{Binding ClearLogCommand}" 
+                            Padding="8,4"
+                            Background="#f1f5f9"
+                            Foreground="#334155"
+                            BorderBrush="#e2e8f0"
+                            CornerRadius="4"/>
                 </StackPanel>
                 
-                <ScrollViewer Grid.Row="1">
+                <ScrollViewer Grid.Row="1" Background="Transparent">
                     <TextBox Text="{Binding LogText}" 
                            IsReadOnly="True" 
                            TextWrapping="Wrap"
                            FontFamily="Consolas"
-                           Background="Black" Foreground="LightGreen"
-                           Classes.pointer="False">
-                        <TextBox.Styles>
-                            <Style Selector="TextBox:pointerover">
-                                <Setter Property="Background" Value="Black"/>
-                            </Style>
-                        </TextBox.Styles>
-                    </TextBox>
+                           FontSize="13"
+                           Padding="12"
+                           Background="#f8fafc"
+                           Foreground="#1e293b"
+                           BorderThickness="1"
+                           BorderBrush="#e2e8f0"
+                           CornerRadius="6"/>
                 </ScrollViewer>
                 
                 <!-- 进度信息 -->
-                <StackPanel Grid.Row="2" Spacing="5" Margin="0,5,0,0">
+                <StackPanel Grid.Row="2" Spacing="8" Margin="0,10,0,0">
                     <TextBlock Text="{Binding CurrentParameter}" 
                              TextWrapping="Wrap" 
-                             FontSize="12"/>
+                             FontSize="12"
+                             Foreground="#64748b"/>
                     <ProgressBar Value="{Binding ProgressPercentage}" 
                                Maximum="100" 
-                               Height="20"/>
+                               Height="8"
+                               Background="#e2e8f0"
+                               Foreground="#f59e0b"
+                               CornerRadius="4"/>
                     <TextBlock Text="{Binding ProgressPercentage, StringFormat='进度: {0:F1}%'}" 
-                             HorizontalAlignment="Center"/>
+                             HorizontalAlignment="Center"
+                             Foreground="#64748b"/>
                 </StackPanel>
             </Grid>
         </Border>
         
-        <!-- 右侧：结果面板 -->
+        <!-- 右侧：结果分析 -->
         <Border Grid.Row="1" Grid.Column="2" 
-                BorderBrush="Gray" BorderThickness="1" 
-                Padding="10" Margin="5,0,0,0">
-            <Grid RowDefinitions="Auto,*">
+                BorderBrush="#e2e8f0" BorderThickness="1" 
+                Padding="15" Margin="5,0,0,0"
+                Background="#ffffff"
+                CornerRadius="8">
+            <Grid RowDefinitions="Auto,*,Auto">
                 <TextBlock Grid.Row="0" 
-                         Text="扫描结果" 
+                         Text="结果分析" 
                          FontSize="16" FontWeight="Bold" 
-                         Margin="0,0,0,10"/>
+                         Margin="0,0,0,10"
+                         Foreground="#1e293b"/>
                 
-                <ScrollViewer Grid.Row="1">
+                <ScrollViewer Grid.Row="1" Background="Transparent">
                     <ItemsControl ItemsSource="{Binding ScanResults}">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <WrapPanel Orientation="Horizontal"/>
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
                         <ItemsControl.ItemTemplate>
                             <DataTemplate>
-                                <Border Margin="0,5" 
-                                      Padding="10" 
-                                      BorderBrush="{Binding Success, Converter={StaticResource BoolToColorConverter}, ConverterParameter='Green|Red'}"
-                                      BorderThickness="2"
-                                      CornerRadius="5"
-                                      Background="{Binding Success, Converter={StaticResource BoolToColorConverter}, ConverterParameter='#E8F5E9|#FFEBEE'}">
-                                    <StackPanel Spacing="8">
-                                        <!-- 地址在中间，大字体 -->
-                                        <TextBlock FontWeight="Bold" FontSize="18" HorizontalAlignment="Center">
-                                            <Run Text="Slave ID: "/>
+                                <Button Width="60" Height="60"
+                                        Margin="4"
+                                        BorderThickness="2"
+                                        CornerRadius="6"
+                                        Command="{Binding DataContext.ToggleResultDetailCommand, RelativeSource={RelativeSource AncestorType={x:Type ItemsControl}}}"
+                                        CommandParameter="{Binding}">
+                                    <Button.Styles>
+                                        <Style Selector="Button">
+                                            <Setter Property="BorderBrush" Value="#e2e8f0"/>
+                                            <Setter Property="Background" Value="#f8fafc"/>
+                                            <Setter Property="Foreground" Value="#64748b"/>
+                                        </Style>
+                                        <Style Selector="Button:pointerover">
+                                            <Setter Property="BorderBrush" Value="#94a3b8"/>
+                                            <Setter Property="Background" Value="#f1f5f9"/>
+                                        </Style>
+                                        <Style Selector="Button:checked">
+                                            <Setter Property="BorderBrush" Value="#3b82f6"/>
+                                            <Setter Property="Background" Value="#eff6ff"/>
+                                        </Style>
+                                    </Button.Styles>
+                                    <Button.Background>
+                                        <Binding Path="Success">
+                                            <Binding.Converter>
+                                                <conv:BoolToColorConverter/>
+                                            </Binding.Converter>
+                                            <Binding.ConverterParameter>#d1fae5|#fee2e2</Binding.ConverterParameter>
+                                        </Binding>
+                                    </Button.Background>
+                                    <Button.BorderBrush>
+                                        <Binding Path="Success">
+                                            <Binding.Converter>
+                                                <conv:BoolToColorConverter/>
+                                            </Binding.Converter>
+                                            <Binding.ConverterParameter>#10b981|#ef4444</Binding.ConverterParameter>
+                                        </Binding>
+                                    </Button.BorderBrush>
+                                    <Button.Foreground>
+                                        <Binding Path="Success">
+                                            <Binding.Converter>
+                                                <conv:BoolToColorConverter/>
+                                            </Binding.Converter>
+                                            <Binding.ConverterParameter>#059669|#dc2626</Binding.ConverterParameter>
+                                        </Binding>
+                                    </Button.Foreground>
+                                    <StackPanel Spacing="4" VerticalAlignment="Center" HorizontalAlignment="Center">
+                                        <TextBlock FontWeight="Bold" FontSize="16" HorizontalAlignment="Center">
                                             <Run Text="{Binding SlaveId}"/>
                                         </TextBlock>
+                                        <TextBlock FontSize="9" Foreground="{Binding Success, Converter={StaticResource BoolToColorConverter}, ConverterParameter='#10b981|#ef4444'}" HorizontalAlignment="Center">
+                                            <Run Text="{Binding Success, Converter={StaticResource BoolToTextConverter}, ConverterParameter='成功|失败'}"/>
+                                        </TextBlock>
                                         
-                                        <!-- 状态标签 -->
-                                        <TextBlock Foreground="{Binding Success, Converter={StaticResource BoolToColorConverter}, ConverterParameter='Green|Red'}"
-                                                 FontWeight="Bold"
-                                                 FontSize="12"
-                                                 HorizontalAlignment="Center"
-                                                 Text="{Binding Success, Converter={StaticResource BoolToTextConverter}, ConverterParameter='成功|失败'}"/>
-                                        
-                                        <!-- 功能码、起始地址、数量 -->
-                                        <StackPanel Spacing="3" Margin="0,5,0,0">
-                                            <TextBlock HorizontalAlignment="Center">
-                                                <Run Text="功能码: "/>
-                                                <Run Text="{Binding FunctionCode}"/>
-                                            </TextBlock>
-                                            <TextBlock HorizontalAlignment="Center">
-                                                <Run Text="寄存器起始地址: "/>
-                                                <Run Text="{Binding StartAddress}"/>
-                                            </TextBlock>
-                                            <TextBlock HorizontalAlignment="Center">
-                                                <Run Text="寄存器数量: "/>
-                                                <Run Text="{Binding Count}"/>
-                                            </TextBlock>
+                                        <!-- 详细信息，默认隐藏，点击按钮后显示 -->
+                                        <StackPanel IsVisible="{Binding IsDetailVisible}" Spacing="4" Margin="0,4,0,0">
+                                            <Border BorderBrush="#e2e8f0" BorderThickness="1" CornerRadius="4" Padding="6" Background="#f8fafc" Width="150">
+                                                <StackPanel Spacing="2">
+                                                    <TextBlock FontSize="10" Foreground="#64748b">
+                                                        <Run Text="FC: "/>
+                                                        <Run Text="{Binding FunctionCode}"/>
+                                                    </TextBlock>
+                                                    <TextBlock FontSize="10" Foreground="#64748b">
+                                                        <Run Text="Reg: "/>
+                                                        <Run Text="{Binding StartAddress}"/>
+                                                    </TextBlock>
+                                                    <TextBlock FontSize="10" Foreground="#64748b" IsVisible="{Binding Success}">
+                                                        <Run Text="可信度: "/>
+                                                        <Run Text="{Binding ReliabilityScore.TotalScore, StringFormat='{}{0:F1}'}"/>
+                                                    </TextBlock>
+                                                    <TextBlock FontSize="10" Foreground="#ef4444" IsVisible="{Binding !Success}">
+                                                        <Run Text="错误: "/>
+                                                        <Run Text="{Binding ErrorMessage}"/>
+                                                    </TextBlock>
+                                                </StackPanel>
+                                            </Border>
                                         </StackPanel>
-                                        
-                                        <!-- 可信度（仅成功时显示） -->
-                                        <TextBlock IsVisible="{Binding Success}" HorizontalAlignment="Center" Margin="0,5,0,0">
-                                            <Run Text="可信度: "/>
-                                            <Run Text="{Binding ReliabilityScore.TotalScore, StringFormat='{}{0:F1}'}"/>
-                                            <Run Text=" | 等级: "/>
-                                            <Run Text="{Binding ReliabilityScore.Level}"/>
-                                        </TextBlock>
-                                        
-                                        <!-- 错误消息（仅失败时显示） -->
-                                        <TextBlock IsVisible="{Binding !Success}" 
-                                                 Foreground="Red"
-                                                 TextWrapping="Wrap"
-                                                 HorizontalAlignment="Center"
-                                                 Margin="0,5,0,0"
-                                                 Text="{Binding ErrorMessage}"/>
-                                        
-                                        <!-- 扫描时间 -->
-                                        <TextBlock FontSize="10" Foreground="Gray" HorizontalAlignment="Center" Margin="0,5,0,0">
-                                            <Run Text="扫描时间: "/>
-                                            <Run Text="{Binding ScanTime, StringFormat='{}{0:yyyy-MM-dd HH:mm:ss}'}"/>
-                                        </TextBlock>
                                     </StackPanel>
-                                </Border>
+                                </Button>
                             </DataTemplate>
                         </ItemsControl.ItemTemplate>
                     </ItemsControl>
                 </ScrollViewer>
+                
+                <StackPanel Grid.Row="2" Margin="0,10,0,0">
+                    <TextBlock FontSize="12" Foreground="#64748b"
+                               HorizontalAlignment="Center">
+                        <Run Text="共找到 " />
+                        <Run Text="{Binding ScanResults.Count}"/>
+                        <Run Text=" 个结果" />
+                    </TextBlock>
+                </StackPanel>
             </Grid>
         </Border>
     </Grid>
