@@ -1,9 +1,12 @@
+using System.ComponentModel;
+using System.Runtime.CompilerServices;
+
 namespace FindModbus.Core.Models;
 
 /// <summary>
 /// 扫描结果
 /// </summary>
-public class ScanResult
+public class ScanResult : INotifyPropertyChanged
 {
     /// <summary>
     /// 是否成功
@@ -55,10 +58,36 @@ public class ScanResult
     /// </summary>
     public DateTime ScanTime { get; set; } = DateTime.Now;
     
+    private bool _isDetailVisible = false;
     /// <summary>
     /// 详情是否可见（UI 绑定用）
     /// </summary>
-    public bool IsDetailVisible { get; set; } = false;
+    public bool IsDetailVisible 
+    {
+        get { return _isDetailVisible; }
+        set 
+        {
+            if (_isDetailVisible != value)
+            {
+                _isDetailVisible = value;
+                OnPropertyChanged();
+            }
+        }
+    }
+    
+    /// <summary>
+    /// 属性变更通知事件
+    /// </summary>
+    public event PropertyChangedEventHandler? PropertyChanged;
+    
+    /// <summary>
+    /// 触发属性变更通知
+    /// </summary>
+    /// <param name="propertyName">属性名</param>
+    protected virtual void OnPropertyChanged([CallerMemberName] string? propertyName = null)
+    {
+        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+    }
 }
 
 

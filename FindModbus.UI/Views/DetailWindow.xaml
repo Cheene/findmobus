@@ -1,0 +1,147 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:FindModbus.UI.ViewModels"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d"
+        x:Class="FindModbus.UI.Views.DetailWindow"
+        x:DataType="vm:DetailWindowViewModel"
+        Title="扫描结果详情"
+        Width="500"
+        Height="400"
+        WindowStartupLocation="CenterOwner"
+        CanResize="False"
+        Background="#f8fafc">
+    
+    <Window.Styles>
+        <Style Selector="TextBlock">
+            <Setter Property="Foreground" Value="#334155"/>
+        </Style>
+        <Style Selector="Button">
+            <Setter Property="Foreground" Value="#334155"/>
+            <Setter Property="Background" Value="#f1f5f9"/>
+            <Setter Property="BorderBrush" Value="#e2e8f0"/>
+        </Style>
+        <Style Selector="Button:pointerover">
+            <Setter Property="Background" Value="#e2e8f0"/>
+            <Setter Property="BorderBrush" Value="#94a3b8"/>
+        </Style>
+    </Window.Styles>
+    
+    <Grid RowDefinitions="*,Auto">
+        <StackPanel Spacing="10" Margin="20">
+            <!-- 基本信息 -->
+            <TextBlock FontSize="18" FontWeight="Bold" Foreground="#1e293b">
+                扫描结果详情
+            </TextBlock>
+            
+            <Grid ColumnDefinitions="*,150">
+                <StackPanel Spacing="6">
+                    <TextBlock FontSize="14" FontWeight="SemiBold">
+                        <Run Text="Slave ID: "/>
+                        <Run Text="{Binding SlaveId}"/>
+                    </TextBlock>
+                    <Grid ColumnDefinitions="*,*,*">
+                        <TextBlock FontSize="14">
+                            <Run Text="功能码: "/>
+                            <Run Text="{Binding FunctionCode}"/>
+                        </TextBlock>
+                        <TextBlock FontSize="14" Grid.Column="1">
+                            <Run Text="寄存器地址: "/>
+                            <Run Text="{Binding StartAddress}"/>
+                        </TextBlock>
+                        <TextBlock FontSize="14" Grid.Column="2">
+                            <Run Text="寄存器数量: "/>
+                            <Run Text="{Binding Count}"/>
+                        </TextBlock>
+                    </Grid>
+                    <TextBlock FontSize="14">
+                        <Run Text="扫描时间: "/>
+                        <Run Text="{Binding ScanTime}"/>
+                    </TextBlock>
+                </StackPanel>
+                
+                <StackPanel Spacing="8" Grid.Column="1">
+                    <Border BorderBrush="{Binding StatusBrush}" BorderThickness="2" CornerRadius="8" Padding="10" Background="{Binding StatusBackground}">
+                        <TextBlock FontSize="16" FontWeight="Bold" Foreground="{Binding StatusBrush}" HorizontalAlignment="Center">
+                            <Run Text="{Binding Status}"/>
+                        </TextBlock>
+                    </Border>
+                </StackPanel>
+            </Grid>
+            
+            <Separator BorderBrush="#e2e8f0"/>
+            
+            <!-- 详细信息 -->
+            <TextBlock FontSize="16" FontWeight="SemiBold">
+                详细信息
+            </TextBlock>
+            
+            <Grid ColumnDefinitions="*,*">
+                <StackPanel Spacing="4" Grid.Column="0">
+                    <TextBlock FontSize="12" Foreground="#64748b">
+                        <Run Text="连接模式: "/>
+                        <Run Text="{Binding ConnectionMode}"/>
+                    </TextBlock>
+                    <TextBlock FontSize="12" Foreground="#64748b">
+                        <Run Text="连接参数: "/>
+                        <Run Text="{Binding ConnectionParams}"/>
+                    </TextBlock>
+                </StackPanel>
+                
+                <StackPanel Spacing="4" Grid.Column="1">
+                    <TextBlock FontSize="12" Foreground="#64748b">
+                        <Run Text="数据长度: "/>
+                        <Run Text="{Binding DataLength}"/>
+                    </TextBlock>
+                    <TextBlock FontSize="12" Foreground="#64748b">
+                        <Run Text="响应时间: "/>
+                        <Run Text="{Binding ResponseTime}"/>
+                    </TextBlock>
+                </StackPanel>
+            </Grid>
+            
+            <!-- 错误信息 -->
+            <Border IsVisible="{Binding IsError}" BorderBrush="#ef4444" BorderThickness="1" CornerRadius="6" Padding="10" Background="#fee2e2" Margin="0,10,0,0">
+                <TextBlock FontSize="12" Foreground="#dc2626" TextWrapping="Wrap">
+                    <Run Text="错误信息: "/>
+                    <Run Text="{Binding ErrorMessage}"/>
+                </TextBlock>
+            </Border>
+            
+            <!-- 报文信息 -->
+            <StackPanel Margin="0,8,0,0">
+                <TextBlock FontSize="16" FontWeight="SemiBold">
+                    报文数据
+                </TextBlock>
+                
+                <Border BorderBrush="#e2e8f0" BorderThickness="1" CornerRadius="6" Padding="8" Background="#f8fafc" Margin="0,4,0,0">
+                    <StackPanel Spacing="5">
+                        <TextBlock FontSize="12" FontWeight="SemiBold" Foreground="#334155">
+                            请求报文
+                        </TextBlock>
+                        <TextBlock FontSize="11" Foreground="#64748b" TextWrapping="Wrap">
+                            <Run Text="{Binding RequestMessage}"/>
+                        </TextBlock>
+                    </StackPanel>
+                </Border>
+                
+                <Border BorderBrush="#e2e8f0" BorderThickness="1" CornerRadius="6" Padding="8" Background="#f8fafc" Margin="0,4,0,0">
+                    <StackPanel Spacing="5">
+                        <TextBlock FontSize="12" FontWeight="SemiBold" Foreground="#334155">
+                            响应报文
+                        </TextBlock>
+                        <TextBlock FontSize="11" Foreground="#64748b" TextWrapping="Wrap">
+                            <Run Text="{Binding ResponseMessage}"/>
+                        </TextBlock>
+                    </StackPanel>
+                </Border>
+            </StackPanel>
+        </StackPanel>
+        
+        <!-- 按钮区域 -->
+        <StackPanel Grid.Row="1" Orientation="Horizontal" Spacing="10" HorizontalAlignment="Right" Margin="20,20,20,20">
+            <Button Content="关闭" Command="{Binding CloseCommand}" Padding="12,6" CornerRadius="6" Width="100"/>
+        </StackPanel>
+    </Grid>
+</Window>

@@ -269,9 +269,37 @@ public partial class MainWindowViewModel : ObservableObject
     }
     
     [RelayCommand]
-    private void ToggleResultDetail(ScanResult result)
+    private void ShowDetail(ScanResult result)
     {
-        result.IsDetailVisible = !result.IsDetailVisible;
+        if (result != null)
+        {
+            AddLog($"ShowDetail called for Slave ID {result.SlaveId}");
+            
+            // 创建详情窗口视图模型
+            var viewModel = new DetailWindowViewModel(result);
+            
+            // 创建并显示详情窗口
+            var detailWindow = new FindModbus.UI.Views.DetailWindow(viewModel);
+            
+            // 获取主窗口实例
+            var desktop = Avalonia.Application.Current?.ApplicationLifetime as Avalonia.Controls.ApplicationLifetimes.IClassicDesktopStyleApplicationLifetime;
+            var mainWindow = desktop?.MainWindow;
+            
+            if (mainWindow != null)
+            {
+                // 确保窗口在主窗口上方显示
+                detailWindow.ShowDialog(mainWindow);
+            }
+            else
+            {
+                detailWindow.Show();
+                AddLog("Main window not found, showing dialog as non-modal");
+            }
+        }
+        else
+        {
+            AddLog("ShowDetail called with null result");
+        }
     }
 
 
